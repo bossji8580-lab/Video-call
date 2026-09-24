@@ -1,178 +1,728 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#07070a">
-  <title>Video Call — Connect Instantly</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --bg:#07070a;--card:#111116;--card2:#17171e;
-      --pink:#ff3f91;--pink2:#ff76b4;--text:#fff;--muted:#a8a8b3;
-      --line:rgba(255,255,255,.09)
-    }
-    body{
-      min-height:100vh;background:
-      radial-gradient(circle at 15% 10%,rgba(255,63,145,.20),transparent 32%),
-      radial-gradient(circle at 90% 20%,rgba(112,70,255,.16),transparent 28%),
-      var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
-      overflow-x:hidden
-    }
-    a{text-decoration:none;color:inherit}
-    .wrap{width:min(1080px,92%);margin:auto}
-    header{
-      height:76px;display:flex;align-items:center;justify-content:space-between;
-      border-bottom:1px solid var(--line);backdrop-filter:blur(18px);
-      position:sticky;top:0;z-index:10;background:rgba(7,7,10,.72)
-    }
-    .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:20px}
-    .dot{width:12px;height:12px;border-radius:50%;background:var(--pink);box-shadow:0 0 24px var(--pink)}
-    .status{font-size:13px;color:#bfffdc;border:1px solid rgba(100,255,180,.18);
-      background:rgba(80,255,160,.07);padding:8px 12px;border-radius:999px}
-    main{padding:62px 0 48px}
-    .hero{text-align:center;max-width:780px;margin:auto}
-    .badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,63,145,.3);
-      background:rgba(255,63,145,.08);color:#ff9ac6;padding:8px 13px;border-radius:999px;font-size:13px;margin-bottom:20px}
-    h1{font-size:clamp(44px,8vw,82px);line-height:.95;letter-spacing:-4px}
-    h1 span{background:linear-gradient(90deg,#fff,#ff70ad);-webkit-background-clip:text;color:transparent}
-    .sub{color:var(--muted);font-size:17px;line-height:1.65;max-width:620px;margin:22px auto 30px}
-    .actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
-    button{font:inherit;cursor:pointer;border:0}
-    .primary{
-      padding:15px 22px;border-radius:15px;color:#fff;font-weight:800;
-      background:linear-gradient(135deg,var(--pink),#ff237d);
-      box-shadow:0 12px 35px rgba(255,63,145,.28);transition:.2s
-    }
-    .primary:hover{transform:translateY(-2px);box-shadow:0 16px 42px rgba(255,63,145,.4)}
-    .secondary{padding:15px 22px;border-radius:15px;background:#15151b;color:#eee;border:1px solid var(--line)}
-    .preview{
-      margin:48px auto 0;max-width:900px;min-height:420px;border:1px solid var(--line);
-      border-radius:30px;background:linear-gradient(145deg,#15151b,#0d0d11);
-      box-shadow:0 35px 100px rgba(0,0,0,.5);position:relative;overflow:hidden
-    }
-    .glow{position:absolute;width:260px;height:260px;border-radius:50%;background:var(--pink);
-      filter:blur(100px);opacity:.16;right:-80px;top:-80px}
-    .mockbar{height:54px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:7px}
-    .mockbar i{width:9px;height:9px;border-radius:50%;background:#444}
-    .screen{display:grid;grid-template-columns:1.35fr .65fr;gap:18px;padding:18px;min-height:365px}
-    .video{border-radius:22px;background:linear-gradient(145deg,#26232b,#111116);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-    .avatar{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;font-size:40px;font-weight:900;
-      background:linear-gradient(135deg,#ff3f91,#663cff);box-shadow:0 20px 60px rgba(255,63,145,.28)}
-    .live{position:absolute;left:16px;top:16px;background:#09090caa;border:1px solid var(--line);padding:7px 10px;border-radius:9px;font-size:12px}
-    .mini{border-radius:22px;background:#0c0c10;border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;justify-content:space-between}
-    .mini h3{font-size:20px}.mini p{color:var(--muted);font-size:13px;line-height:1.6;margin-top:7px}
-    .featuregrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:25px}
-    .feature{background:rgba(17,17,22,.85);border:1px solid var(--line);border-radius:20px;padding:22px}
-    .icon{font-size:24px;margin-bottom:13px}.feature h3{font-size:16px}.feature p{color:var(--muted);font-size:13px;line-height:1.6;margin-top:7px}
-    footer{border-top:1px solid var(--line);padding:25px 0;color:#777;font-size:12px;text-align:center}
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
-    .modal.show{display:flex}
-    .modalcard{width:min(410px,100%);background:#121217;border:1px solid var(--line);border-radius:25px;padding:28px;text-align:center;box-shadow:0 30px 100px #000}
-    .loader{width:64px;height:64px;border:4px solid #292932;border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite;margin:5px auto 20px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .modalcard h2{font-size:25px}.modalcard p{color:var(--muted);margin:10px 0 20px;line-height:1.5}
-    .timer{font-size:36px;font-weight:900;color:var(--pink);margin:10px}
-    .close{margin-top:12px;background:transparent;color:#aaa}
-    @media(max-width:720px){
-      main{padding-top:42px}.screen{grid-template-columns:1fr}.mini{min-height:150px}.featuregrid{grid-template-columns:1fr}
-      .preview{min-height:570px}h1{letter-spacing:-2px}
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;width:92%">
-      <div class="brand"><span class="dot"></span> Video Call</div>
-      <div class="status">● Online</div>
-    </div>
-  </header>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#09050d">
+<title>Video Call — Connect & Talk</title>
 
-  <main class="wrap">
-    <section class="hero">
-      <div class="badge">✦ Premium calling experience</div>
-      <h1>Connect.<br><span>Talk. Smile.</span></h1>
-      <p class="sub">A clean, modern video-call experience designed for fast connections and a beautiful mobile-first interface.</p>
-      <div class="actions">
-        <button class="primary" onclick="startCall()">📞 Start Video Call</button>
-        <button class="secondary" onclick="showInfo()">Learn more</button>
-      </div>
-    </section>
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-    <section class="preview">
-      <div class="glow"></div>
-      <div class="mockbar"><i></i><i></i><i></i></div>
-      <div class="screen">
-        <div class="video">
-          <div class="live">● LIVE PREVIEW</div>
-          <div class="avatar">VC</div>
-        </div>
-        <div class="mini">
-          <div>
-            <h3>Video Call</h3>
-            <p>Tap the button above to start your connection.</p>
-          </div>
-          <button class="primary" onclick="startCall()">Start now →</button>
-        </div>
-      </div>
-    </section>
+html{
+  scroll-behavior:smooth;
+}
 
-    <section class="featuregrid">
-      <div class="feature"><div class="icon">⚡</div><h3>Fast connection</h3><p>Simple interface with a quick start flow.</p></div>
-      <div class="feature"><div class="icon">🔒</div><h3>Clean & private</h3><p>Minimal design without unnecessary clutter.</p></div>
-      <div class="feature"><div class="icon">💎</div><h3>Premium look</h3><p>Dark glass styling with a polished pink accent.</p></div>
-    </section>
-  </main>
+body{
+  background:#09050d;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}
 
-  <footer>© 2026 Video Call · Built for a modern web experience</footer>
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    radial-gradient(circle at 50% 20%,rgba(255,30,160,.15),transparent 35%),
+    radial-gradient(circle at 10% 80%,rgba(170,40,255,.10),transparent 30%);
+}
 
-  <div class="modal" id="callModal">
-    <div class="modalcard">
-      <div class="loader"></div>
-      <h2>Connecting…</h2>
-      <p id="callText">Preparing your video call</p>
-      <div class="timer" id="timer">3</div>
-      <button class="close" onclick="closeModal()">Cancel</button>
-    </div>
-  </div>
+.nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  height:82px;
+  padding:0 25px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:rgba(9,5,13,.90);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(255,80,180,.16);
+}
 
-  <div class="modal" id="infoModal">
-    <div class="modalcard">
-      <h2>Video Call</h2>
-      <p>This is a premium starter website. You can later connect the button to your real Android APK or calling service.</p>
-      <button class="primary" onclick="closeInfo()">Got it</button>
-    </div>
-  </div>
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:27px;
+  font-weight:800;
+}
 
-<script>
-  let interval;
-  function startCall(){
-    const modal=document.getElementById('callModal');
-    const timer=document.getElementById('timer');
-    const text=document.getElementById('callText');
-    let n=3;
-    modal.classList.add('show');
-    timer.textContent=n;
-    text.textContent='Preparing your video call';
-    clearInterval(interval);
-    interval=setInterval(()=>{
-      n--;
-      if(n>0){timer.textContent=n;}
-      else{
-        clearInterval(interval);
-        timer.textContent='✓';
-        text.textContent='Ready to continue';
-        setTimeout(()=>{
-          closeModal();
-          // Put your APK link here when your APK is uploaded:
-          // window.location.href = 'your-app.apk';
-        },900);
-      }
-    },1000);
+.logo{
+  width:54px;
+  height:54px;
+  border-radius:17px;
+  display:grid;
+  place-items:center;
+  font-size:28px;
+  background:linear-gradient(145deg,#ff239c,#ad3cff);
+  box-shadow:0 0 30px rgba(255,35,160,.35);
+}
+
+.pink{
+  color:#ff55b5;
+}
+
+.online{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#bcaebd;
+  font-size:14px;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#36e78b;
+  box-shadow:0 0 12px #36e78b;
+}
+
+.wrap{
+  width:min(1100px,calc(100% - 40px));
+  margin:auto;
+}
+
+.hero{
+  min-height:700px;
+  padding:90px 0 70px;
+  text-align:center;
+}
+
+.badge{
+  display:inline-block;
+  padding:11px 20px;
+  border-radius:30px;
+  color:#ead9e8;
+  border:1px solid rgba(255,75,180,.30);
+  background:rgba(255,30,150,.05);
+  font-size:15px;
+}
+
+h1{
+  margin:30px auto 22px;
+  max-width:900px;
+  font-size:clamp(48px,8vw,82px);
+  line-height:1;
+  letter-spacing:-3px;
+}
+
+.gradient{
+  background:linear-gradient(90deg,#ff62ba,#c547ff);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.hero-text{
+  max-width:720px;
+  margin:auto;
+  color:#bcaebd;
+  font-size:20px;
+  line-height:1.7;
+}
+
+.buttons{
+  margin-top:32px;
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  display:inline-block;
+  padding:17px 28px;
+  border-radius:17px;
+  font-size:17px;
+  font-weight:800;
+  text-decoration:none;
+  cursor:pointer;
+  transition:.25s;
+}
+
+.btn:hover{
+  transform:translateY(-3px);
+}
+
+.primary{
+  color:white;
+  background:linear-gradient(90deg,#ff249c,#bf3dff);
+  box-shadow:0 12px 35px rgba(255,35,160,.25);
+}
+
+.secondary{
+  color:white;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,75,180,.22);
+}
+
+.stats{
+  margin:45px auto 0;
+  max-width:650px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+
+.stat{
+  padding:18px 10px;
+  border-radius:18px;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.stat strong{
+  display:block;
+  font-size:24px;
+  color:#ff5ab7;
+}
+
+.stat span{
+  color:#958797;
+  font-size:13px;
+}
+
+.preview{
+  display:flex;
+  justify-content:center;
+  padding:10px 0 100px;
+}
+
+.phone{
+  width:310px;
+  height:590px;
+  padding:24px;
+  border:9px solid #18131d;
+  border-radius:43px;
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(255,255,255,.14),transparent 25%),
+    linear-gradient(150deg,#6f235b,#fa2699 52%,#68257d);
+  box-shadow:
+    0 0 75px rgba(255,35,165,.28),
+    inset 0 0 30px rgba(255,255,255,.08);
+}
+
+.camera{
+  width:80px;
+  height:17px;
+  border-radius:20px;
+  background:#151119;
+  margin:auto;
+}
+
+.phone-title{
+  text-align:center;
+  margin-top:25px;
+  font-size:21px;
+  font-weight:800;
+}
+
+.video-circle{
+  width:145px;
+  height:145px;
+  margin:65px auto 35px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-size:55px;
+  background:rgba(255,255,255,.12);
+  border:3px solid rgba(255,255,255,.45);
+  box-shadow:0 0 35px rgba(255,255,255,.13);
+}
+
+.call-name{
+  text-align:center;
+  font-size:21px;
+  font-weight:800;
+}
+
+.call-status{
+  text-align:center;
+  margin-top:7px;
+  color:#f0dbe9;
+  font-size:14px;
+}
+
+.phone-buttons{
+  position:absolute;
+  left:25px;
+  right:25px;
+  bottom:30px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+}
+
+.round{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.2);
+  font-size:21px;
+}
+
+.end{
+  background:#ff3b83;
+}
+
+.section{
+  padding:90px 0;
+}
+
+.center{
+  text-align:center;
+}
+
+.eyebrow{
+  color:#ff56b5;
+  font-weight:800;
+  letter-spacing:1.5px;
+  font-size:14px;
+}
+
+h2{
+  margin:16px 0;
+  font-size:clamp(38px,6vw,58px);
+}
+
+.sub{
+  max-width:720px;
+  margin:auto;
+  color:#ad9eae;
+  font-size:18px;
+  line-height:1.7;
+}
+
+.cards{
+  margin-top:45px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+
+.card{
+  padding:32px;
+  min-height:245px;
+  border-radius:25px;
+  background:linear-gradient(145deg,rgba(47,21,51,.75),rgba(17,9,23,.9));
+  border:1px solid rgba(255,70,175,.18);
+}
+
+.icon{
+  font-size:42px;
+}
+
+.card h3{
+  margin:22px 0 10px;
+  font-size:24px;
+}
+
+.card p{
+  color:#aa9aaa;
+  line-height:1.7;
+}
+
+.download{
+  margin:30px 0 100px;
+  padding:55px 30px;
+  text-align:center;
+  border-radius:32px;
+  border:1px solid rgba(255,75,180,.28);
+  background:linear-gradient(145deg,rgba(48,18,51,.75),rgba(13,7,18,.95));
+  box-shadow:0 0 60px rgba(255,30,160,.08);
+}
+
+.download p{
+  max-width:680px;
+  margin:0 auto 30px;
+  color:#b9a9b9;
+  line-height:1.7;
+}
+
+.apk-note{
+  margin-top:15px;
+  color:#827384;
+  font-size:13px;
+}
+
+footer{
+  padding:55px 0 80px;
+  border-top:1px solid rgba(255,255,255,.07);
+  color:#968797;
+}
+
+.footer-brand{
+  color:white;
+  font-size:25px;
+  font-weight:800;
+  margin-bottom:10px;
+}
+
+.top{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  border:1px solid rgba(255,80,180,.3);
+  background:#170b1b;
+  color:white;
+  font-size:20px;
+  cursor:pointer;
+}
+
+@media(max-width:700px){
+
+  .nav{
+    padding:0 16px;
   }
-  function closeModal(){clearInterval(interval);document.getElementById('callModal').classList.remove('show')}
-  function showInfo(){document.getElementById('infoModal').classList.add('show')}
-  function closeInfo(){document.getElementById('infoModal').classList.remove('show')}
-</script>
+
+  .brand{
+    font-size:23px;
+  }
+
+  .logo{
+    width:48px;
+    height:48px;
+  }
+
+  .online{
+    font-size:12px;
+  }
+
+  .hero{
+    padding-top:65px;
+  }
+
+  h1{
+    font-size:51px;
+    letter-spacing:-2px;
+  }
+
+  .hero-text{
+    font-size:17px;
+  }
+
+  .btn{
+    width:100%;
+    text-align:center;
+  }
+
+  .stats{
+    gap:8px;
+  }
+
+  .stat{
+    padding:15px 5px;
+  }
+
+  .stat strong{
+    font-size:20px;
+  }
+
+  .stat span{
+    font-size:11px;
+  }
+
+  .phone{
+    width:285px;
+    height:550px;
+  }
+
+  .cards{
+    grid-template-columns:1fr;
+  }
+
+  .card{
+    min-height:210px;
+  }
+
+  .download{
+    padding:42px 20px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<header class="nav">
+
+  <div class="brand">
+    <div class="logo">📹</div>
+    <div>Video <span class="pink">Call</span></div>
+  </div>
+
+  <div class="online">
+    <span class="dot"></span>
+    Online
+  </div>
+
+</header>
+
+
+<main>
+
+<section class="hero">
+
+  <div class="wrap">
+
+    <div class="badge">
+      📹 Premium Video Calling Experience
+    </div>
+
+    <h1>
+      Connect. Talk.<br>
+      <span class="gradient">Smile.</span>
+    </h1>
+
+    <p class="hero-text">
+      Enjoy a beautiful and simple video calling experience.
+      Connect with people, talk and stay connected with a modern interface.
+    </p>
+
+    <div class="buttons">
+
+      <a href="#download" class="btn primary">
+        📲 Download APK
+      </a>
+
+      <a href="#features" class="btn secondary">
+        Explore Features →
+      </a>
+
+    </div>
+
+    <div class="stats">
+
+      <div class="stat">
+        <strong>Fast</strong>
+        <span>Quick connection</span>
+      </div>
+
+      <div class="stat">
+        <strong>HD</strong>
+        <span>Clear calling</span>
+      </div>
+
+      <div class="stat">
+        <strong>24/7</strong>
+        <span>Stay connected</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="preview">
+
+  <div class="phone">
+
+    <div class="camera"></div>
+
+    <div class="phone-title">
+      Video Call
+    </div>
+
+    <div class="video-circle">
+      📹
+    </div>
+
+    <div class="call-name">
+      Ready to Call
+    </div>
+
+    <div class="call-status">
+      Online • Available
+    </div>
+
+    <div class="phone-buttons">
+
+      <div class="round">
+        🎤
+      </div>
+
+      <div class="round end">
+        📞
+      </div>
+
+      <div class="round">
+        📹
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="section" id="features">
+
+  <div class="wrap">
+
+    <div class="center">
+
+      <div class="eyebrow">
+        WHY VIDEO CALL?
+      </div>
+
+      <h2>
+        Everything You Need
+      </h2>
+
+      <p class="sub">
+        A clean, modern and attractive interface designed
+        around a simple video calling experience.
+      </p>
+
+    </div>
+
+
+    <div class="cards">
+
+      <div class="card">
+
+        <div class="icon">
+          📹
+        </div>
+
+        <h3>
+          Easy Video Call
+        </h3>
+
+        <p>
+          A simple interface designed to make starting
+          a video call quick and easy.
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="icon">
+          🔒
+        </div>
+
+        <h3>
+          Privacy Focused
+        </h3>
+
+        <p>
+          Keep your personal information protected with
+          sensible privacy-focused design.
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="icon">
+          ✨
+        </div>
+
+        <h3>
+          Premium Design
+        </h3>
+
+        <p>
+          Beautiful dark, pink and purple styling with
+          a modern mobile-first layout.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="wrap" id="download">
+
+  <div class="download">
+
+    <div class="eyebrow">
+      ANDROID APPLICATION
+    </div>
+
+    <h2>
+      Download <span class="gradient">Video Call</span>
+    </h2>
+
+    <p>
+      Download the Android application and continue
+      with the Video Call experience.
+    </p>
+
+    <!-- APK FILE NAME MUST BE VideoCall.apk -->
+
+    <a
+      class="btn primary"
+      href="VideoCall.apk"
+      download
+    >
+      📲 Download Latest APK
+    </a>
+
+    <div class="apk-note">
+      APK filename: VideoCall.apk
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+  <div class="wrap">
+
+    <div class="footer-brand">
+      📹 Video <span class="pink">Call</span>
+    </div>
+
+    <p>
+      Connect. Talk. Smile.
+    </p>
+
+  </div>
+
+</footer>
+
+
+<button
+  class="top"
+  onclick="window.scrollTo({top:0,behavior:'smooth'})"
+>
+  ↑
+</button>
+
 </body>
 </html>
